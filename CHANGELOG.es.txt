@@ -1,0 +1,64 @@
+Idioma: Español
+
+# Equinox Kernel edición FinaSU: Changelog
+
+Edición de Nanairo8890, con permiso de LF52406. Basada en Equinox Kernel 5.10.269 para el POCO F5 Pro / Redmi K60 (`mondrian`), para MistOS 5.1 Beta.
+Problemas con esta edición: repórtalos a Nanairo8890, no a LF52406 ni a LyraVoid.
+
+---
+
+## 5.10.269 r2 (2026-10-27)
+
+**Nombre del kernel**
+- La versión del kernel ahora dice `5.10.269-Nanairo-FinaSU` (antes `5.10.269-Nanairo`). Los módulos del vendor cargan igual: con MODVERSIONS solo cuentan los CRC, no el nombre. En el teléfono el manager muestra el `uname` que falsifica BRENE, no el nombre real; el real está en `/proc/version` y en `dmesg`.
+
+**Más símbolos ocultos en /proc/kallsyms**
+- El filtro de SUSFS oculta los nombres con prefijos de KernelSU/SUSFS/NoMount, pero FinaSU exporta muchos símbolos cuyo nombre no empieza por esos (`crown_manager`, `apk_sign_keys`, `dynamic_manager_*`, `selinux_hide_*`, `sulog_*`, `avc_spoof_*`, `kernel_umount_*`, `uts_view_*`, los handlers `do_get_/do_set_` de las supercalls, la maquinaria de hooks y de netisolate, etc.). Ahora el filtro también los oculta.
+- Cada prefijo se comprobó contra un Equinox limpio y no coincide con ningún símbolo de ese kernel: solo se ocultan los símbolos propios de FinaSU. Los nombres genéricos que también existen en el kernel de fábrica (`add_rule`, `cache_sid`, `context_struct_compute_av`, etc.) se dejan a propósito, porque taparlos por prefijo ocultaría también símbolos legítimos del kernel.
+
+**Igual que r1**
+- FinaSU v1.2.1 (33074), SUSFS v2.3.0, NoMount v2.2.0, BBR, sobre Equinox limpio.
+
+**Probado en el teléfono** (POCO F5 Pro, MistOS 5.1 Beta 20261025)
+- Arranca. 0 módulos del vendor rechazados. Root funciona, SELinux en Enforcing, sin panics.
+- `/proc/kallsyms` da 0 para todos los prefijos agregados y 0 para el patrón delator completo; los símbolos normales del kernel (`vfs_read`, `module_layout`, `input_event`) siguen presentes.
+
+---
+
+## 5.10.269 r1 (2026-10-27)
+
+**Cambios respecto de Equinox 5.10.269**
+- **Root: FinaSU** de LyraVoid (un fork de KernelSU de tiann) en lugar de KernelSU-Next, como submódulo `KernelSU/` en `be19eb90` (`v1.2.1`, versión 33074), integrado en el kernel. FinaSU usa UAPI 6.
+  - **Necesita el manager oficial de FinaSU** (`FinaSU_v1.2.1_33074-release.apk`, paquete `me.yuki.fina`). El kernel confía en el certificado de firma de ese manager, en la ranura de confianza de release de FinaSU; los managers de la familia KernelSU (BakaSU, ReSukiSU, KernelSU, KernelSU-Next) se reconocen pero no reciben permisos.
+  - Preinit de módulos activo (`initrc` y `preinit/` de los módulos).
+- **SUSFS v2.3.0** desde la rama `gki-android12-5.10` de simonpunk en `eb95da0`, usando el soporte de SUSFS de FinaSU. `eb95da0` corrige un uso de memoria liberada en el filtro de prioridad. FinaSU no despacha algunos comandos de SUSFS (entre ellos el nuevo `SET_PRIORITY_UID_FILTER` y los viejos de rutas de sdcard/data), así que esas funciones no están disponibles.
+- **NoMount v2.2.0** de maxsteeel integrado (`fs/nomount`, `CONFIG_NOMOUNT=y`, commit `bf1847f`), con el arreglo de deref3046. FinaSU detecta el driver integrado por la API de claves (protocolo 22) y no carga su propio `nomount.ko`, así que **no hace falta el metamódulo**: elige NoMount como backend de montaje en el manager, y quita el metamódulo de NoMount si está instalado.
+- **BBR** como control de congestión TCP por defecto (Equinox lo incluye pero arranca con CUBIC). CUBIC sigue disponible y se puede cambiar en caliente.
+- Se conservan tres cambios propios de NoMount: las apps a las que FinaSU/SUSFS desmonta los módulos ven el sistema original, no hay `/sys/module/nomount/version` (`nm version` sigue funcionando), y el filtro de kallsyms de SUSFS oculta los símbolos de NoMount.
+
+**Arreglos sobre una integración simple**
+- El parche GKI de SUSFS declara las claves de los hooks en línea `ksu_is_input_hook_enabled` y `ksu_is_init_rc_hook_enabled` como `static_key_true`, pero FinaSU las define con `DEFINE_STATIC_KEY_FALSE` y pone sus propios hooks. En arm64 el tipo cruzado dejaría los hooks en línea de SUSFS siempre activos (doble conteo de la tecla de volumen abajo); esta edición las declara `static_key_false`, como espera FinaSU.
+- Se aplican las reubicaciones KMI de DroidSpaces de Equinox (SYSVIPC y POSIX_MQUEUE a las reservas KABI de Android); sin ellas cambian unos 9500 CRC de símbolos.
+
+**Igual que Equinox**
+- Linux 5.10.269 con la config de mondrian de Equinox.
+- DroidSpaces con el perfil KMI-safe de Equinox.
+- Arreglos del táctil Goodix, Clang CFI y MODVERSIONS.
+- Instalación por AnyKernel3.
+
+**Detalles técnicos**
+- Compilado con Clang de AOSP (`clang-r584948`) y ThinLTO.
+- Antes de empaquetar: comprobación de KMI contra Equinox limpio (0 CRC cambiados, 0 símbolos eliminados; solo se agrega `put_pid_ns`), y CRC de los módulos del vendor contra MistOS 5.1 Beta 20261025, 20261024, 20261023 y 20261011, y MistOS 5.0 Alpha 20260914 (337 módulos de `vendor_boot` y 390 de `vendor_dlkm` en cada una).
+- `/proc/version` muestra `Nanairo@Equinox`. El `set_uname` de SUSFS solo cambia lo que devuelve `uname`.
+
+---
+
+## Créditos
+- **[LF52406](https://github.com/LF52406)**: Equinox Kernel, la base de esta edición. Apoyo: [PayPal](https://www.paypal.me/LF52406) · [Patreon](https://patreon.com/InfernalGT) · [Boosty](https://boosty.to/infernalgt/donate)
+- [LineageOS](https://github.com/LineageOS/android_kernel_xiaomi_sm8450) y [Android Common Kernel](https://android.googlesource.com/kernel/common).
+- [FinaSU](https://github.com/LyraVoid/FinaSU) de **LyraVoid**, basado en [KernelSU](https://github.com/tiann/KernelSU) de **tiann**.
+- [SUSFS](https://gitlab.com/simonpunk/susfs4ksu) de **simonpunk**.
+- [DroidSpaces](https://github.com/ravindu644/Droidspaces-OSS) de **ravindu644**.
+- [NoMount](https://github.com/maxsteeel/nomount) de **maxsteeel**, con un arreglo de **deref3046**.
+- [AnyKernel3](https://github.com/osm0sis/AnyKernel3) de **osm0sis**.
+- **[Nanairo8890](https://github.com/nanairo8890)**: integración de FinaSU, SUSFS, BBR y NoMount en Equinox.

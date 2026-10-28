@@ -1,0 +1,64 @@
+Language: English
+
+# Equinox Kernel FinaSU Edition: Changelog
+
+Edition by Nanairo8890, with permission from LF52406. Based on Equinox Kernel 5.10.269 for the POCO F5 Pro / Redmi K60 (`mondrian`), for MistOS 5.1 Beta.
+Problems with this edition: report them to Nanairo8890, not to LF52406 or LyraVoid.
+
+---
+
+## 5.10.269 r2 (2026-10-27)
+
+**Kernel name**
+- The kernel version now reads `5.10.269-Nanairo-FinaSU` (previously `5.10.269-Nanairo`). Vendor modules still load: with MODVERSIONS only the symbol CRCs matter, not the release name. On the phone the manager shows the `uname` that BRENE spoofs, not the real name; the real name is in `/proc/version` and `dmesg`.
+
+**More symbols hidden from /proc/kallsyms**
+- SUSFS's symbol filter hides names with the KernelSU/SUSFS/NoMount prefixes, but FinaSU exports many driver symbols whose names do not start with those (`crown_manager`, `apk_sign_keys`, `dynamic_manager_*`, `selinux_hide_*`, `sulog_*`, `avc_spoof_*`, `kernel_umount_*`, `uts_view_*`, the supercall `do_get_/do_set_` handlers, the syscall hook and netisolate machinery, and so on). The filter now also hides those.
+- Each added prefix was checked against a clean Equinox build and matches no exported symbol there, so only FinaSU's own symbols are hidden. Symbols with generic names that also occur in the stock kernel (`add_rule`, `cache_sid`, `context_struct_compute_av`, and so on) are deliberately left alone, because hiding them by prefix would also hide legitimate kernel symbols.
+
+**Same as r1**
+- FinaSU v1.2.1 (33074), SUSFS v2.3.0, NoMount v2.2.0, BBR, on clean Equinox.
+
+**Verified on the phone** (POCO F5 Pro, MistOS 5.1 Beta 20261025)
+- Boots. 0 vendor modules rejected. Root works, SELinux Enforcing, no panics.
+- `/proc/kallsyms` returns 0 for all the added prefixes and 0 for the whole root-revealing pattern; normal kernel symbols (`vfs_read`, `module_layout`, `input_event`) are still present.
+
+---
+
+## 5.10.269 r1 (2026-10-27)
+
+**Changes from Equinox 5.10.269**
+- **Root: FinaSU** by LyraVoid (a fork of KernelSU by tiann) instead of KernelSU-Next, as the `KernelSU/` submodule at `be19eb90` (`v1.2.1`, version 33074), built into the kernel. FinaSU uses UAPI 6.
+  - **Requires the official FinaSU manager** (`FinaSU_v1.2.1_33074-release.apk`, package `me.yuki.fina`). The kernel trusts that manager's signing certificate in FinaSU's release trust slot; other KernelSU-family managers (BakaSU, ReSukiSU, KernelSU, KernelSU-Next) are recognized but never granted.
+  - Module preinit is active (modules' `initrc` and `preinit/`).
+- **SUSFS v2.3.0** from simonpunk's `gki-android12-5.10` branch at `eb95da0`, using FinaSU's SUSFS support. `eb95da0` fixes a use-after-free in the priority-uid filter. FinaSU does not dispatch a few SUSFS commands (among them the new `SET_PRIORITY_UID_FILTER` and the old sdcard/data path commands), so those features are unavailable.
+- **NoMount v2.2.0** by maxsteeel built in (`fs/nomount`, `CONFIG_NOMOUNT=y`, commit `bf1847f`), with deref3046's fix. FinaSU detects the built-in driver through the key API (protocol 22) and does not load its own `nomount.ko`, so **no metamodule is needed**: choose NoMount as the mount backend in the manager, and remove the NoMount metamodule if it is installed.
+- **BBR** is the default TCP congestion control (Equinox includes it but starts with CUBIC). CUBIC is still available and can be switched at runtime.
+- Three edition-specific NoMount changes are kept: apps whose modules FinaSU/SUSFS unmount see the original system, there is no `/sys/module/nomount/version` (`nm version` still works), and SUSFS's kallsyms filter hides NoMount symbols.
+
+**Fixes over a plain integration**
+- The SUSFS GKI patch declares the inline-hook keys `ksu_is_input_hook_enabled` and `ksu_is_init_rc_hook_enabled` as `static_key_true`, but FinaSU defines them with `DEFINE_STATIC_KEY_FALSE` and installs its own hooks. On arm64 the mismatched type would leave SUSFS's inline hooks always on (double-counting volume-down presses); this edition declares them `static_key_false`, as FinaSU intends.
+- Equinox's DroidSpaces KMI relocations (SYSVIPC and POSIX_MQUEUE into Android KABI reserves) are applied; without them about 9500 symbol CRCs change.
+
+**Same as Equinox**
+- Linux 5.10.269 with Equinox's mondrian config.
+- DroidSpaces with Equinox's KMI-safe profile.
+- Goodix touch fixes, Clang CFI and MODVERSIONS.
+- AnyKernel3 installation.
+
+**Technical details**
+- Built with AOSP Clang (`clang-r584948`) and ThinLTO.
+- Before packaging: KMI check against clean Equinox (0 changed CRCs, 0 removed symbols; only `put_pid_ns` is added), and vendor module CRCs against MistOS 5.1 Beta 20261025, 20261024, 20261023 and 20261011, and MistOS 5.0 Alpha 20260914 (337 `vendor_boot` and 390 `vendor_dlkm` modules each).
+- `/proc/version` shows `Nanairo@Equinox`. SUSFS's `set_uname` only changes what `uname` returns.
+
+---
+
+## Credits
+- **[LF52406](https://github.com/LF52406)**: Equinox Kernel, the base of this edition. Support: [PayPal](https://www.paypal.me/LF52406) · [Patreon](https://patreon.com/InfernalGT) · [Boosty](https://boosty.to/infernalgt/donate)
+- [LineageOS](https://github.com/LineageOS/android_kernel_xiaomi_sm8450) and [Android Common Kernel](https://android.googlesource.com/kernel/common).
+- [FinaSU](https://github.com/LyraVoid/FinaSU) by **LyraVoid**, based on [KernelSU](https://github.com/tiann/KernelSU) by **tiann**.
+- [SUSFS](https://gitlab.com/simonpunk/susfs4ksu) by **simonpunk**.
+- [DroidSpaces](https://github.com/ravindu644/Droidspaces-OSS) by **ravindu644**.
+- [NoMount](https://github.com/maxsteeel/nomount) by **maxsteeel**, with a fix by **deref3046**.
+- [AnyKernel3](https://github.com/osm0sis/AnyKernel3) by **osm0sis**.
+- **[Nanairo8890](https://github.com/nanairo8890)**: FinaSU, SUSFS, BBR and NoMount integration into Equinox.
