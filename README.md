@@ -23,8 +23,7 @@
 > - **Extra `/proc/kallsyms` hiding** (r2): FinaSU exports many driver symbols whose names do not start with the usual KernelSU/SUSFS prefixes, so SUSFS's filter left them visible. The filter now also hides those, each one checked against a clean Equinox build so only FinaSU's own symbols are hidden.
 >
 > Everything else, DroidSpaces included, is LF52406's work, described below. The official Equinox
-> builds are at [LF52406/Equinox-Kernel-sm8450](https://github.com/LF52406/Equinox-Kernel-sm8450), and the
-> BakaSU edition for MistOS is at [nanairo8890/Equinox-Kernel-sm8450](https://github.com/nanairo8890/Equinox-Kernel-sm8450).
+> builds are at [LF52406/Equinox-Kernel-sm8450](https://github.com/LF52406/Equinox-Kernel-sm8450).
 > Report problems with this edition to Nanairo8890, not to LF52406 or LyraVoid.
 >
 > Build: `CLANG_DIR=/path/to/clang/bin scripts/equinox/build-finasu.sh` · Changes: [release notes](scripts/equinox/release-notes/5.10.269-finasu-r2.md) · Changelog: [English](CHANGELOG.en.txt) · [Español](CHANGELOG.es.txt) · [Português (Brasil)](CHANGELOG.pt-BR.txt) · [Русский](CHANGELOG.ru.txt)
