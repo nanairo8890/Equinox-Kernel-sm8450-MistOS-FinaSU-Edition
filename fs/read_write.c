@@ -640,7 +640,7 @@ ssize_t ksys_read(unsigned int fd, char __user *buf, size_t count)
 }
 
 #ifdef CONFIG_KSU_SUSFS
-extern struct static_key_true ksu_is_init_rc_hook_enabled;
+extern struct static_key_false ksu_is_init_rc_hook_enabled;
 extern __attribute__((cold)) void ksu_handle_sys_read(unsigned int fd);
 #endif
 
