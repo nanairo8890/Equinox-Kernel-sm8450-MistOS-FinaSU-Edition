@@ -7,6 +7,17 @@ Problemas com esta edição: reporte-os ao Nanairo8890, não ao LF52406 nem ao L
 
 ---
 
+## Próxima versão (não publicada)
+
+**Verificação dos módulos do vendor antes de instalar**
+- O instalador lê os módulos do vendor da ROM em `vendor_boot` e `vendor_dlkm` e os compara, com o `kmicheck`, com a tabela de símbolos do próprio kernel antes de gravar qualquer coisa. Se algum módulo fosse rejeitado (CRC diferente, um símbolo que este kernel não exporta, uma exportação duplicada ou um vermagic diferente), ele para, lista os módulos e deixa o aparelho como estava. Os módulos de `modules.blocklist` não são verificados. Um zip com `nocheck` no nome pula a verificação.
+- Novo script de empacotamento `scripts/equinox/package-finasu.sh`, que adiciona ao zip do AnyKernel3 o `kmicheck` (uma ferramenta arm64 estática de 8 KB, sem libc), o `kmi.symvers` e o `kmi.vermagic`.
+
+**Correções**
+- O `build-finasu.sh` esperava a versão `5.10.269-Nanairo` e parava antes de compilar desde a mudança de nome do r2; agora espera `5.10.269-Nanairo-FinaSU`.
+
+---
+
 ## 5.10.269 r2 (2026-10-27)
 
 **Nome do kernel**

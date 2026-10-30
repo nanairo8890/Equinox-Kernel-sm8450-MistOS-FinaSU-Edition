@@ -7,6 +7,17 @@ Problems with this edition: report them to Nanairo8890, not to LF52406 or LyraVo
 
 ---
 
+## Next build (unreleased)
+
+**Vendor module check before flashing**
+- The installer reads the ROM's vendor modules from `vendor_boot` and `vendor_dlkm` and checks them with `kmicheck` against the kernel's own symbol table before writing anything. If a module would be rejected (different CRC, a symbol this kernel does not export, a duplicate export or a different vermagic), it stops, lists the modules and leaves the phone as it was. Modules in `modules.blocklist` are not checked. A zip whose name contains `nocheck` skips the check.
+- New packaging script `scripts/equinox/package-finasu.sh`, which adds `kmicheck` (an 8 KB static arm64 tool without libc), `kmi.symvers` and `kmi.vermagic` to the AnyKernel3 zip.
+
+**Fixes**
+- `build-finasu.sh` expected the kernel release `5.10.269-Nanairo` and stopped before building since the r2 rename; it now expects `5.10.269-Nanairo-FinaSU`.
+
+---
+
 ## 5.10.269 r2 (2026-10-27)
 
 **Kernel name**

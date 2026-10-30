@@ -26,7 +26,7 @@
 > builds are at [LF52406/Equinox-Kernel-sm8450](https://github.com/LF52406/Equinox-Kernel-sm8450).
 > Report problems with this edition to Nanairo8890, not to LF52406 or LyraVoid.
 >
-> Build: `CLANG_DIR=/path/to/clang/bin scripts/equinox/build-finasu.sh` · Changes: [release notes](scripts/equinox/release-notes/5.10.269-finasu-r2.md) · Changelog: [English](CHANGELOG.en.txt) · [Español](CHANGELOG.es.txt) · [Português (Brasil)](CHANGELOG.pt-BR.txt) · [Русский](CHANGELOG.ru.txt)
+> Build: `CLANG_DIR=/path/to/clang/bin scripts/equinox/build-finasu.sh`, then `scripts/equinox/package-finasu.sh` · Changes: [release notes](scripts/equinox/release-notes/5.10.269-finasu-r2.md) · Changelog: [English](CHANGELOG.en.txt) · [Español](CHANGELOG.es.txt) · [Português (Brasil)](CHANGELOG.pt-BR.txt) · [Русский](CHANGELOG.ru.txt)
 
 ---
 
@@ -84,6 +84,22 @@ Builds are published through **GitHub Releases**, with the SHA256 of each file o
 Download the release asset and flash the AnyKernel3 ZIP using a compatible recovery or kernel flasher. The ZIP only replaces the kernel `Image`; if you update MistOS, flash it again afterwards. Install the FinaSU manager from the release to manage root, modules and SUSFS.
 
 > GitHub-generated `Source code` archives are not flashable kernel packages.
+
+---
+
+## Other AOSP ROMs
+
+The ZIP keeps the ROM's vendor modules (`vendor_boot` and `vendor_dlkm`), and those only load on a kernel with the same symbol CRCs (KMI) as the kernel they were built with. A single `Image` therefore works on the ROMs whose kernel comes from the same source as Equinox, not on every ROM:
+
+| ROM kernel source | Linux | Status |
+|:--|:--|:--|
+| MistOS 5.1 Beta / 5.0 Alpha | 5.10.269 | Tested |
+| LineageOS `lineage-24.0` (Android 17) and `lineage-23.2` (Android 16 QPR2), and ROMs built on them | 5.10.269 | Expected to work: same tree as Equinox |
+| LineageOS `lineage-23.0` / `lineage-23.1` (Android 16) | 5.10.247 | Not verified |
+| LineageOS `lineage-22.2` (Android 15) | 5.10.245 | Not verified |
+| HyperOS / MIUI | | Not supported |
+
+Packages made with `scripts/equinox/package-finasu.sh` check this before flashing: `kmicheck` reads the ROM's modules from `vendor_boot` and `vendor_dlkm` and compares them with the kernel's own symbol table (`kmi.symvers`). If any module would be rejected (different CRC, a symbol this kernel does not export, a duplicate export or a different vermagic), the installer stops before writing anything and lists the modules. A ZIP with `nocheck` in its file name skips the check. The r2 package predates this check.
 
 ---
 
