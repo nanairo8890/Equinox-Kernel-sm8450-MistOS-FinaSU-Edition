@@ -91,11 +91,13 @@ Download the release asset and flash the AnyKernel3 ZIP using a compatible recov
 
 The ZIP keeps the ROM's vendor modules (`vendor_boot` and `vendor_dlkm`), and those only load on a kernel with the same symbol CRCs (KMI) as the kernel they were built with. A single `Image` therefore works on the ROMs whose kernel comes from the same source as Equinox, not on every ROM:
 
-| ROM kernel source | Linux | Status |
+| ROM | ROM kernel | Status |
 |:--|:--|:--|
 | MistOS 5.1 Beta / 5.0 Alpha | 5.10.269 | Tested |
-| crDroid 12.12 by Taha Keles (2026-09-30, Android 16) | 5.10.260 | Vendor modules checked with `kmicheck`: all 725 (non-blocklisted) match the r2 kernel |
-| Lunaris AOSP 3.12 by Keosh (2026-10-03, Android 16) | 5.10.269 | Reported working; vendor modules checked: all 725 match |
+| Latest builds from Keosh: crDroid 12.12 (20260928), Evolution X 11.11, Infinity-X 3.12 (VANILLA, GAPPS core and extra, 29.09.2026), Lunaris 3.12 (VANILLA and GMS), LineageOS 23.2 (20260929), Axion 2.8 (VANILLA and GMS) | `5.10.269-gki-g1598dc02ea84` | Compatible: the CRCs of all 337 `vendor_boot` and 390 `vendor_dlkm` modules match the r2 kernel |
+| Infinity-X 4.1 by LF5 (17.10.2026) | | Compatible |
+| crDroid 12.12 by Taha Keles (20260930) | `5.10.260-Weil+` | Compatible: all 725 non-blocklisted modules match the r2 kernel (`kmicheck`) |
+| AOSPA calcite (a17-gms 20261012, a17-microg 20261013), PenguinOS celerity (20261011) | `5.10.269-beryl-7156c6f9fb`, their own | **Not compatible**: 376 + 279 `vendor_boot` / `vendor_dlkm` modules, almost all with other CRCs |
 | LineageOS `lineage-24.0` (Android 17) and `lineage-23.2` (Android 16 QPR2), and ROMs built on them | 5.10.269 | Expected to work: same tree as Equinox |
 | LineageOS `lineage-23.0` / `lineage-23.1` (Android 16) | 5.10.247 | Not verified |
 | LineageOS `lineage-22.2` (Android 15) | 5.10.245 | Not verified |
