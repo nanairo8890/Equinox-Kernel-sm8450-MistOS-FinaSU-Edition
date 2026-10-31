@@ -5,7 +5,7 @@
 ## See CREDITOS.md.
 
 properties() { '
-kernel.string=Equinox Kernel 5.10.269 by LF52406 - FinaSU mod by Nanairo
+kernel.string=Equinox Kernel 5.10.269 by LF52406 - FinaSU mod @EDITION_VERSION@ by Nanairo
 do.devicecheck=1
 do.modules=0
 do.systemless=0
@@ -163,6 +163,7 @@ ui_print "          by Nanairo8890"
 ui_print " ==================================="
 ui_print " Device   : POCO F5 Pro / Redmi K60"
 ui_print " Codename : mondrian"
+ui_print " Version  : @EDITION_VERSION@"
 ui_print " Kernel   : @KERNEL_RELEASE@"
 ui_print " Root     : FinaSU v1.2.1 (33074)"
 ui_print " SUSFS    : 2.3.0"

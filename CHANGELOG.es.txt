@@ -7,7 +7,9 @@ Problemas con esta edición: repórtalos a Nanairo8890, no a LF52406 ni a LyraVo
 
 ---
 
-## Próxima versión (sin publicar)
+## 1.5 (2026-10-31)
+
+Mismo kernel que r2 (`5.10.269-Nanairo-FinaSU`, el mismo Image); esta versión cambia el instalador. La release también trae el paquete como `Equinox-5.10.269-FinaSU-1.5-mondrian-checkonly.zip`, que solo hace la comprobación.
 
 **Comprobación de los módulos del vendor antes de flashear**
 - El instalador lee los módulos del vendor de la ROM desde `vendor_boot` y `vendor_dlkm` y los compara con `kmicheck` contra la tabla de símbolos del propio kernel antes de escribir nada. Si algún módulo fuera rechazado (CRC distinto, un símbolo que este kernel no exporta, una exportación duplicada o un vermagic distinto), se detiene, lista los módulos y deja el teléfono como estaba. Los módulos de `modules.blocklist` no se comprueban. Un zip con `nocheck` en el nombre se salta la comprobación; uno con `checkonly` solo hace la comprobación y no flashea nada, para probar cualquier ROM sin riesgo.

@@ -26,7 +26,7 @@
 > builds are at [LF52406/Equinox-Kernel-sm8450](https://github.com/LF52406/Equinox-Kernel-sm8450).
 > Report problems with this edition to Nanairo8890, not to LF52406 or LyraVoid.
 >
-> Build: `CLANG_DIR=/path/to/clang/bin scripts/equinox/build-finasu.sh`, then `scripts/equinox/package-finasu.sh` · Changes: [release notes](scripts/equinox/release-notes/5.10.269-finasu-r2.md) · Changelog: [English](CHANGELOG.en.txt) · [Español](CHANGELOG.es.txt) · [Português (Brasil)](CHANGELOG.pt-BR.txt) · [Русский](CHANGELOG.ru.txt)
+> Build: `CLANG_DIR=/path/to/clang/bin scripts/equinox/build-finasu.sh`, then `scripts/equinox/package-finasu.sh` · Changes: [release notes](scripts/equinox/release-notes/5.10.269-finasu-1.5.md) · Changelog: [English](CHANGELOG.en.txt) · [Español](CHANGELOG.es.txt) · [Português (Brasil)](CHANGELOG.pt-BR.txt) · [Русский](CHANGELOG.ru.txt)
 
 ---
 
@@ -34,8 +34,9 @@
 
 | Component | Current |
 |:--|:--|
+| **Version** | `1.5` |
 | **Linux** | `5.10.269-Nanairo-FinaSU` |
-| **Compatibility** | MistOS 5.1 Beta 17.0 (Android 17); tested on build 20261025 |
+| **Compatibility** | MistOS and the AOSP ROMs listed in [Other AOSP ROMs](#other-aosp-roms); tested on MistOS 5.1 Beta 20261025 |
 | **FinaSU** | `v1.2.1` (33074), built in |
 | **SUSFS** | `2.3.0` (`eb95da0`) |
 | **NoMount** | `v2.2.0` built in |
@@ -55,11 +56,18 @@
 | **Containers** | DroidSpaces · PID namespaces · IPC / SYSVIPC |
 | **Networking** | TCP BBR · runtime congestion-control switching |
 | **Device** | mondrian production config · Goodix touch stability fixes |
-| **Packaging** | Verified AnyKernel3 release package |
+| **Packaging** | Verified AnyKernel3 release package · vendor module check before flashing |
 
 ---
 
 ## Latest Changes
+
+### 1.5
+
+- Same kernel as r2 (`5.10.269-Nanairo-FinaSU`, identical `Image`); this version changes the installer
+- The installer checks the ROM's `vendor_boot` and `vendor_dlkm` modules against the kernel before flashing and stops without writing anything if they would not load
+- `checkonly` package: tells whether a ROM is compatible and flashes nothing
+- Checked compatible: MistOS, the latest builds from Keosh (crDroid, Evolution X, Infinity-X, Lunaris, LineageOS, Axion), Infinity-X 4.1 by LF5 and crDroid 12.12 by Taha Keles; not compatible: AOSPA and PenguinOS
 
 ### 5.10.269 r2
 
@@ -79,9 +87,11 @@
 
 Builds are published through **GitHub Releases**, with the SHA256 of each file on the release page.
 
-**Current package:** `Equinox-5.10.269-FinaSU-mondrian-20261027.zip`
+**Current package:** `Equinox-5.10.269-FinaSU-1.5-mondrian.zip`
 
-Download the release asset and flash the AnyKernel3 ZIP using a compatible recovery or kernel flasher. The ZIP only replaces the kernel `Image`; if you update MistOS, flash it again afterwards. Install the FinaSU manager from the release to manage root, modules and SUSFS.
+Download the release asset and flash the AnyKernel3 ZIP using a compatible recovery or kernel flasher. The ZIP only replaces the kernel `Image`, after checking that the ROM's vendor modules accept it; if you update the ROM, flash it again afterwards. Install the FinaSU manager from the release to manage root, modules and SUSFS.
+
+Not sure whether your ROM is compatible? Flash `Equinox-5.10.269-FinaSU-1.5-mondrian-checkonly.zip` first: it runs the same check and flashes nothing.
 
 > GitHub-generated `Source code` archives are not flashable kernel packages.
 
@@ -103,7 +113,7 @@ The ZIP keeps the ROM's vendor modules (`vendor_boot` and `vendor_dlkm`), and th
 | LineageOS `lineage-22.2` (Android 15) | 5.10.245 | Not verified |
 | HyperOS / MIUI | | Not supported |
 
-Packages made with `scripts/equinox/package-finasu.sh` check this before flashing: `kmicheck` reads the ROM's modules from `vendor_boot` and `vendor_dlkm` and compares them with the kernel's own symbol table (`kmi.symvers`). If any module would be rejected (different CRC, a symbol this kernel does not export, a duplicate export or a different vermagic), the installer stops before writing anything and lists the modules. A ZIP with `nocheck` in its file name skips the check; one with `checkonly` runs the check and flashes nothing, to find out whether a ROM is compatible. The r2 package predates this check.
+Packages made with `scripts/equinox/package-finasu.sh` check this before flashing: `kmicheck` reads the ROM's modules from `vendor_boot` and `vendor_dlkm` and compares them with the kernel's own symbol table (`kmi.symvers`). If any module would be rejected (different CRC, a symbol this kernel does not export, a duplicate export or a different vermagic), the installer stops before writing anything and lists the modules. A ZIP with `nocheck` in its file name skips the check; one with `checkonly` runs the check and flashes nothing, to find out whether a ROM is compatible. Packages from 1.5 on include this check; r2 does not.
 
 ---
 
