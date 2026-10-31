@@ -137,6 +137,18 @@ If you find **Equinox Kernel** useful and would like to support its continued de
 
 ---
 
+## Support Nanairo
+
+If this FinaSU edition is useful to you and you would like to support Nanairo8890's work on it (the FinaSU, SUSFS and NoMount integration, and the vendor module check), donations are welcome but entirely optional.
+
+<div align="center">
+
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support-FF5E5B?style=for-the-badge&logo=kofi&logoColor=white)](https://ko-fi.com/nanairo8890)
+
+</div>
+
+---
+
 ## Credits & Upstreams
 
 - [**LF52406**](https://github.com/LF52406) — Equinox Kernel, the base of this edition
