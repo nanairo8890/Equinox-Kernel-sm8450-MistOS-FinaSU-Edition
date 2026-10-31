@@ -26,7 +26,7 @@
 > builds are at [LF52406/Equinox-Kernel-sm8450](https://github.com/LF52406/Equinox-Kernel-sm8450).
 > Report problems with this edition to Nanairo8890, not to LF52406 or LyraVoid.
 >
-> Build: `CLANG_DIR=/path/to/clang/bin scripts/equinox/build-finasu.sh` · Changes: [release notes](scripts/equinox/release-notes/5.10.269-finasu-r2.md) · Changelog: [English](CHANGELOG.en.txt) · [Español](CHANGELOG.es.txt) · [Português (Brasil)](CHANGELOG.pt-BR.txt) · [Русский](CHANGELOG.ru.txt)
+> Build: `CLANG_DIR=/path/to/clang/bin scripts/equinox/build-finasu.sh`, then `scripts/equinox/package-finasu.sh` · Changes: [release notes](scripts/equinox/release-notes/5.10.269-finasu-1.5.md) · Changelog: [English](CHANGELOG.en.txt) · [Español](CHANGELOG.es.txt) · [Português (Brasil)](CHANGELOG.pt-BR.txt) · [Русский](CHANGELOG.ru.txt)
 
 ---
 
@@ -34,8 +34,9 @@
 
 | Component | Current |
 |:--|:--|
+| **Version** | `1.5` |
 | **Linux** | `5.10.269-Nanairo-FinaSU` |
-| **Compatibility** | MistOS 5.1 Beta 17.0 (Android 17); tested on build 20261025 |
+| **Compatibility** | MistOS and the AOSP ROMs listed in [Other AOSP ROMs](#other-aosp-roms); tested on MistOS 5.1 Beta 20261025 |
 | **FinaSU** | `v1.2.1` (33074), built in |
 | **SUSFS** | `2.3.0` (`eb95da0`) |
 | **NoMount** | `v2.2.0` built in |
@@ -55,11 +56,18 @@
 | **Containers** | DroidSpaces · PID namespaces · IPC / SYSVIPC |
 | **Networking** | TCP BBR · runtime congestion-control switching |
 | **Device** | mondrian production config · Goodix touch stability fixes |
-| **Packaging** | Verified AnyKernel3 release package |
+| **Packaging** | Verified AnyKernel3 release package · vendor module check before flashing |
 
 ---
 
 ## Latest Changes
+
+### 1.5
+
+- Same kernel as r2 (`5.10.269-Nanairo-FinaSU`, identical `Image`); this version changes the installer
+- The installer checks the ROM's `vendor_boot` and `vendor_dlkm` modules against the kernel before flashing and stops without writing anything if they would not load
+- `checkonly` package: tells whether a ROM is compatible and flashes nothing
+- Checked compatible: MistOS, the latest builds from Keosh (crDroid, Evolution X, Infinity-X, Lunaris, LineageOS, Axion), Infinity-X 4.1 by LF5 and crDroid 12.12 by Taha Keles; not compatible: AOSPA and PenguinOS
 
 ### 5.10.269 r2
 
@@ -79,11 +87,33 @@
 
 Builds are published through **GitHub Releases**, with the SHA256 of each file on the release page.
 
-**Current package:** `Equinox-5.10.269-FinaSU-mondrian-20261027.zip`
+**Current package:** `Equinox-5.10.269-FinaSU-1.5-mondrian.zip`
 
-Download the release asset and flash the AnyKernel3 ZIP using a compatible recovery or kernel flasher. The ZIP only replaces the kernel `Image`; if you update MistOS, flash it again afterwards. Install the FinaSU manager from the release to manage root, modules and SUSFS.
+Download the release asset and flash the AnyKernel3 ZIP using a compatible recovery or kernel flasher. The ZIP only replaces the kernel `Image`, after checking that the ROM's vendor modules accept it; if you update the ROM, flash it again afterwards. Install the FinaSU manager from the release to manage root, modules and SUSFS.
+
+Not sure whether your ROM is compatible? Flash `Equinox-5.10.269-FinaSU-1.5-mondrian-checkonly.zip` first: it runs the same check and flashes nothing.
 
 > GitHub-generated `Source code` archives are not flashable kernel packages.
+
+---
+
+## Other AOSP ROMs
+
+The ZIP keeps the ROM's vendor modules (`vendor_boot` and `vendor_dlkm`), and those only load on a kernel with the same symbol CRCs (KMI) as the kernel they were built with. A single `Image` therefore works on the ROMs whose kernel comes from the same source as Equinox, not on every ROM:
+
+| ROM | ROM kernel | Status |
+|:--|:--|:--|
+| MistOS 5.1 Beta / 5.0 Alpha | 5.10.269 | Tested |
+| Latest builds from Keosh: crDroid 12.12 (20260928), Evolution X 11.11, Infinity-X 3.12 (VANILLA, GAPPS core and extra, 29.09.2026), Lunaris 3.12 (VANILLA and GMS), LineageOS 23.2 (20260929), Axion 2.8 (VANILLA and GMS) | `5.10.269-gki-g1598dc02ea84` | Compatible: the CRCs of all 337 `vendor_boot` and 390 `vendor_dlkm` modules match the r2 kernel |
+| Infinity-X 4.1 by LF5 (17.10.2026) | | Compatible |
+| crDroid 12.12 by Taha Keles (20260930) | `5.10.260-Weil+` | Compatible: all 725 non-blocklisted modules match the r2 kernel (`kmicheck`) |
+| AOSPA calcite (a17-gms 20261012, a17-microg 20261013), PenguinOS celerity (20261011) | `5.10.269-beryl-7156c6f9fb`, their own | **Not compatible**: 376 + 279 `vendor_boot` / `vendor_dlkm` modules, almost all with other CRCs |
+| LineageOS `lineage-24.0` (Android 17) and `lineage-23.2` (Android 16 QPR2), and ROMs built on them | 5.10.269 | Expected to work: same tree as Equinox |
+| LineageOS `lineage-23.0` / `lineage-23.1` (Android 16) | 5.10.247 | Not verified |
+| LineageOS `lineage-22.2` (Android 15) | 5.10.245 | Not verified |
+| HyperOS / MIUI | | Not supported |
+
+Packages made with `scripts/equinox/package-finasu.sh` check this before flashing: `kmicheck` reads the ROM's modules from `vendor_boot` and `vendor_dlkm` and compares them with the kernel's own symbol table (`kmi.symvers`). If any module would be rejected (different CRC, a symbol this kernel does not export, a duplicate export or a different vermagic), the installer stops before writing anything and lists the modules. A ZIP with `nocheck` in its file name skips the check; one with `checkonly` runs the check and flashes nothing, to find out whether a ROM is compatible. Packages from 1.5 on include this check; r2 does not.
 
 ---
 

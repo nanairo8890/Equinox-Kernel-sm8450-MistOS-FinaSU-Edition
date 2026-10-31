@@ -57,9 +57,9 @@ rm -f "$OUT/include/config/auto.conf" "$OUT/include/config/auto.conf.cmd"
 # FinaSU's preinit runner is built against the target UAPI headers
 "${MAKE[@]}" -s headers
 release=$("${MAKE[@]}" -s kernelrelease)
-[ "$release" = 5.10.269-Nanairo ] || { echo "[!] unexpected kernel release: $release"; exit 1; }
+[ "$release" = 5.10.269-Nanairo-FinaSU ] || { echo "[!] unexpected kernel release: $release"; exit 1; }
 
 "${MAKE[@]}" -j"$(nproc)" Image
 echo "[+] $OUT/arch/arm64/boot/Image ($release)"
-echo "    Before sharing a build, compare $OUT/vmlinux.symvers against a clean Equinox"
-echo "    build with scripts/equinox/symvers-diff.sh: changed_crc and removed must be 0."
+echo "    Package it with scripts/equinox/package-finasu.sh; with KMI_BASELINE set to a clean"
+echo "    Equinox vmlinux.symvers it also requires 0 changed CRCs and 0 removed exports."
