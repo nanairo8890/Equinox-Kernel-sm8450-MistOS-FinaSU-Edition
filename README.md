@@ -94,6 +94,8 @@ The ZIP keeps the ROM's vendor modules (`vendor_boot` and `vendor_dlkm`), and th
 | ROM kernel source | Linux | Status |
 |:--|:--|:--|
 | MistOS 5.1 Beta / 5.0 Alpha | 5.10.269 | Tested |
+| crDroid 12.12 by Taha Keles (2026-09-30, Android 16) | 5.10.260 | Vendor modules checked with `kmicheck`: all 725 (non-blocklisted) match the r2 kernel |
+| Lunaris AOSP 3.12 by Keosh (2026-10-03, Android 16) | 5.10.269 | Reported working; vendor modules checked: all 725 match |
 | LineageOS `lineage-24.0` (Android 17) and `lineage-23.2` (Android 16 QPR2), and ROMs built on them | 5.10.269 | Expected to work: same tree as Equinox |
 | LineageOS `lineage-23.0` / `lineage-23.1` (Android 16) | 5.10.247 | Not verified |
 | LineageOS `lineage-22.2` (Android 15) | 5.10.245 | Not verified |
