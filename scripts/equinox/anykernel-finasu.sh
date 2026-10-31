@@ -180,6 +180,14 @@ ui_print " "
 
 kmi_check
 
+# a zip whose name contains "checkonly" only reports whether this ROM is compatible
+case "$(basename "$ZIPFILE")" in
+    *checkonly*)
+        ui_print " " " Check only (checkonly in the zip name): nothing was flashed."
+        exit 0
+        ;;
+esac
+
 ui_print " "
 ui_print " Replacing kernel Image..."
 ui_print " "

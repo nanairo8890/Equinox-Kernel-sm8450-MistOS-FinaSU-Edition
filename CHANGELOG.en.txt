@@ -10,7 +10,7 @@ Problems with this edition: report them to Nanairo8890, not to LF52406 or LyraVo
 ## Next build (unreleased)
 
 **Vendor module check before flashing**
-- The installer reads the ROM's vendor modules from `vendor_boot` and `vendor_dlkm` and checks them with `kmicheck` against the kernel's own symbol table before writing anything. If a module would be rejected (different CRC, a symbol this kernel does not export, a duplicate export or a different vermagic), it stops, lists the modules and leaves the phone as it was. Modules in `modules.blocklist` are not checked. A zip whose name contains `nocheck` skips the check.
+- The installer reads the ROM's vendor modules from `vendor_boot` and `vendor_dlkm` and checks them with `kmicheck` against the kernel's own symbol table before writing anything. If a module would be rejected (different CRC, a symbol this kernel does not export, a duplicate export or a different vermagic), it stops, lists the modules and leaves the phone as it was. Modules in `modules.blocklist` are not checked. A zip whose name contains `nocheck` skips the check; one whose name contains `checkonly` only runs the check and flashes nothing, so any ROM can be tested safely.
 - New packaging script `scripts/equinox/package-finasu.sh`, which adds `kmicheck` (an 8 KB static arm64 tool without libc), `kmi.symvers` and `kmi.vermagic` to the AnyKernel3 zip.
 
 **Fixes**
